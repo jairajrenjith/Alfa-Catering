@@ -147,8 +147,8 @@ export default function Slots({ slots }) {
   }, [visibleMonths]);
 
   return (
-    <section className="slots-section" id="slots">
-      <div className="container">
+    <section className="slots-section" id="slots" style={{ overflow:'hidden' }}>
+      <div className="container" style={{ overflow:'hidden', maxWidth:'100%' }}>
         <span className="section-label">Availability</span>
         <h2 className="section-title">Booking Slots</h2>
         <p className="malayalam" style={{ color:'var(--text-mid)', marginTop:'0.5rem', fontSize:'0.95rem' }}>
@@ -417,12 +417,13 @@ export default function Slots({ slots }) {
               {/* Available dates to book */}
               {freeSlotsRows.length > 0 && (
                 <div style={{ background:'var(--available-light)', borderRadius:'var(--radius)',
-                  padding:'1rem 1.25rem', border:'1px solid rgba(39,174,96,0.2)' }}>
+                  padding:'1rem 1.25rem', border:'1px solid rgba(39,174,96,0.2)',
+                  overflow:'hidden', maxWidth:'100%', boxSizing:'border-box' }}>
                   <p style={{ fontWeight:700, color:'var(--available)', fontSize:'0.88rem',
                     marginBottom:'0.6rem', letterSpacing:'0.03em' }}>
                     Available dates — Book Now
                   </p>
-                  <div style={{ display:'flex', flexWrap:'wrap', gap:'0.5rem' }}>
+                  <div style={{ display:'flex', flexWrap:'wrap', gap:'0.5rem', overflow:'hidden', maxWidth:'100%' }}>
                     {freeSlotsRows.map(({ day, freeMorning, freeAfternoon }) => (
                       <div key={day} style={{ display:'flex', alignItems:'center', gap:'0.3rem',
                         background:'var(--white)', borderRadius:8, padding:'0.3rem 0.6rem',
