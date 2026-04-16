@@ -606,8 +606,9 @@
 
 .slots-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
   gap: 1rem;
+  /* min() ensures cards never exceed viewport width on small screens */
 }
 
 .slot-card {
@@ -620,6 +621,9 @@
   box-shadow: var(--shadow-sm);
   border-left: 4px solid transparent;
   transition: all var(--transition);
+  max-width: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
 .slot-card.booked { border-left-color: var(--red); background: var(--red-light); }
@@ -1003,7 +1007,9 @@
   justify-content: center;
   box-shadow: 0 4px 20px rgba(115,79,150,0.4);
   transition: all var(--transition);
-  z-index: 999;
+  z-index: 9999;
+  /* isolation ensures stacking context doesn't clip it */
+  isolation: isolate;
 }
 
 .admin-access-btn:hover { transform: scale(1.1); background: var(--green-light); }
@@ -1084,8 +1090,9 @@
   justify-content: center;
   box-shadow: 0 4px 20px rgba(37,211,102,0.4);
   transition: all var(--transition);
-  z-index: 998;
+  z-index: 9998;
   text-decoration: none;
+  isolation: isolate;
 }
 
 .whatsapp-float:hover { transform: scale(1.12); }
@@ -1198,8 +1205,12 @@ textarea:focus-visible {
   height: 44px;
   border-radius: 50%;
   object-fit: cover;
+  object-position: center;
+  overflow: hidden;
   border: 2px solid rgba(115,79,150,0.4);
   flex-shrink: 0;
+  display: block;
+  background: transparent;
 }
 
 /* ===== BOOKING MODAL ===== */
@@ -1645,15 +1656,20 @@ textarea:focus-visible {
   .cal-book-btns { display: none; } /* tap the day on mobile instead */
 }
 
-/* ── Float buttons — avoid overlap on mobile ── */
+/* ── Float buttons — always visible, safe right positioning ── */
 @media (max-width: 480px) {
   .whatsapp-float {
     width: 48px; height: 48px;
-    bottom: 5rem; right: 1rem;
+    bottom: 5rem;
+    right: 1rem;
+    /* Ensure always on top and never clipped */
+    z-index: 9998;
   }
   .admin-access-btn {
     width: 48px; height: 48px;
-    bottom: 1rem; right: 1rem;
+    bottom: 1rem;
+    right: 1rem;
+    z-index: 9999;
   }
 }
 
@@ -1698,4 +1714,33 @@ textarea:focus-visible {
   z-index: 50;
   pointer-events: none;
   box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+/* ── Global mobile overflow prevention ── */
+@media (max-width: 768px) {
+  /* Prevent ANY section from causing horizontal scroll */
+  .section, .slots-section, .gallery-section,
+  .contact-section, .footer, .container {
+    overflow-x: hidden;
+    max-width: 100vw;
+    box-sizing: border-box;
+  }
+
+  /* Slot cards: never wider than screen */
+  .slot-card {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Prevent hover slide animation from causing overflow on mobile */
+  .slot-card:hover {
+    transform: none;
+  }
+
+  /* Available dates strip */
+  .slots-section .available-dates-strip {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
 }
