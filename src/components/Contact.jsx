@@ -41,7 +41,6 @@ export default function Contact() {
         </div>
 
         <div className="contact-grid">
-          {/* Info Card */}
           <div className="contact-info-card">
             <h3>Alfa Catering BKD</h3>
             <p className="subtitle malayalam">നിങ്ങളുടെ ആഘോഷം ഞങ്ങളുടെ ഉത്തരവാദിത്തം</p>
@@ -58,9 +57,7 @@ export default function Contact() {
               </div>
             ))}
 
-            {/* Social buttons row */}
             <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.2rem' }}>
-              {/* WhatsApp */}
               <a
                 href="https://wa.me/919745575826"
                 target="_blank"
@@ -84,7 +81,6 @@ export default function Contact() {
                 WhatsApp
               </a>
 
-              {/* Instagram */}
               <a
                 href="https://www.instagram.com/bashseer_v__?igsh=MTV0OHUxajZjZmF5MQ%3D%3D&utm_source=qr"
                 target="_blank"
@@ -110,7 +106,6 @@ export default function Contact() {
             </div>
           </div>
 
-          {/* Form */}
           <form className="contact-form" onSubmit={handleSubmit}>
             <h3 style={{ color: 'var(--green)', marginBottom: '0.25rem' }}>Send Enquiry</h3>
             <p className="malayalam" style={{ color: 'var(--text-light)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>

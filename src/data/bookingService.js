@@ -1,25 +1,6 @@
-// ─────────────────────────────────────────────────────────────────────────────
-// Alfa Catering BKD — Firebase Realtime Database
-// Real cross-device sync — all users see the same data instantly
-//
-// SETUP (one time, ~5 minutes):
-//   1. Go to https://console.firebase.google.com → your "alfa-catering" project
-//   2. Left sidebar → Build → Realtime Database → Create database
-//      → Choose region (asia-southeast1 for India) → Start in TEST mode → Done
-//   3. Left sidebar → Project Settings (gear icon) → General tab
-//      → Scroll to "Your apps" → click </> (Web) → Register app → name it
-//      → Copy the firebaseConfig object shown
-//   4. Create a file called .env in your project ROOT (same level as package.json):
-//        VITE_FIREBASE_API_KEY=your_api_key
-//        VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
-//        VITE_FIREBASE_DATABASE_URL=https://your_project-default-rtdb.asia-southeast1.firebasedatabase.app
-//        VITE_FIREBASE_PROJECT_ID=your_project_id
-//   5. Run in your terminal: npm install firebase
-//   6. Run: npm run dev  — done!
-// ─────────────────────────────────────────────────────────────────────────────
-
 import { initializeApp, getApps } from 'firebase/app';
 import { getDatabase, ref, get, set } from 'firebase/database';
+import { getAuth, signInAnonymously } from "firebase/auth";
 
 const FIREBASE_CONFIG = {
   apiKey:            import.meta.env.VITE_FIREBASE_API_KEY,
@@ -31,15 +12,18 @@ const FIREBASE_CONFIG = {
   appId:             import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
-// Initialise only once (handles hot-reload)
 const app = getApps().length ? getApps()[0] : initializeApp(FIREBASE_CONFIG);
 const db  = getDatabase(app);
 
-// ── Keys ──────────────────────────────────────────────────────────────────────
+const auth = getAuth();
+
+signInAnonymously(auth)
+  .then(() => console.log("Auth success"))
+  .catch(console.error);
+
 const BOOKINGS_PATH = 'alfa-bkd/bookings';
 const SLOTS_PATH    = 'alfa-bkd/slots';
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
 async function fbGet(path) {
   try {
     const snap = await get(ref(db, path));
@@ -60,11 +44,9 @@ async function fbSet(path, value) {
   }
 }
 
-// ── Bookings ──────────────────────────────────────────────────────────────────
 export async function getBookings() {
   const data = await fbGet(BOOKINGS_PATH);
   if (!data) return [];
-  // Firebase stores arrays as objects — convert back
   return Array.isArray(data) ? data : Object.values(data);
 }
 
@@ -97,7 +79,6 @@ export async function deleteBooking(id) {
   return updated;
 }
 
-// ── Slots ─────────────────────────────────────────────────────────────────────
 export async function getSharedSlots(fallback) {
   const data = await fbGet(SLOTS_PATH);
   if (!data) return fallback;

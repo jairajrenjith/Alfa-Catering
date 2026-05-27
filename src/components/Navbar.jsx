@@ -27,7 +27,6 @@ export default function Navbar() {
     <nav className="navbar">
       <div className="navbar-inner">
 
-        {/* Brand */}
         <a href="#home" className="navbar-brand">
           <img src={logoImg} alt="Alfa Catering Logo" className="navbar-logo-img" />
           <div className="navbar-name">
@@ -36,7 +35,6 @@ export default function Navbar() {
           </div>
         </a>
 
-        {/* Desktop links */}
         <ul className="navbar-links">
           {links.map(l => (
             <li key={l.href}>
@@ -48,7 +46,6 @@ export default function Navbar() {
           </li>
         </ul>
 
-        {/* Hamburger */}
         <button
           className="navbar-hamburger"
           onClick={() => setMenuOpen(o => !o)}
@@ -61,7 +58,6 @@ export default function Navbar() {
         </button>
       </div>
 
-      {/* Mobile drawer */}
       {menuOpen && (
         <div className="navbar-mobile-menu">
           {links.map(l => (

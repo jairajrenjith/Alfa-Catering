@@ -24,16 +24,13 @@ export default function AdminPanel({ slots, onSlotsChange, onClose }) {
   const MONTH_NUMS = { January:'01',February:'02',March:'03',April:'04',May:'05',June:'06',
                        July:'07',August:'08',September:'09',October:'10',November:'11',December:'12' };
 
-  // Build dynamic month list: all months that appear in slots + next 12 from today
   const dynamicMonths = useMemo(() => {
     const now = new Date();
-    // Months from TODAY onwards (next 24 months) as {month, year} objects
     const futureSet = new Set();
     for (let i = 0; i < 24; i++) {
       const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
       futureSet.add(`${d.getFullYear()}-${ALL_MONTHS[d.getMonth()]}`);
     }
-    // Past months that have actual slots — keep them visible
     const pastWithSlots = new Set();
     localSlots.forEach(s => {
       if (!s.date) return;
@@ -43,14 +40,11 @@ export default function AdminPanel({ slots, onSlotsChange, onClose }) {
       if (slotDate < todayMonth) pastWithSlots.add(`${y}-${ALL_MONTHS[Number(m)-1]}`);
     });
     const allKeys = [...pastWithSlots, ...futureSet];
-    // Convert to unique month names in calendar order for display
-    // Group by month name (if same month name appears in multiple years, show all)
     const result = allKeys.map(k => {
       const [yr, mn] = k.split('-');
       return { year: Number(yr), month: mn, idx: ALL_MONTHS.indexOf(mn) };
     });
     result.sort((a,b) => a.year !== b.year ? a.year - b.year : a.idx - b.idx);
-    // Deduplicate by year+month
     const seen = new Set();
     const deduped = result.filter(r => {
       const key = `${r.year}-${r.month}`;
@@ -58,7 +52,6 @@ export default function AdminPanel({ slots, onSlotsChange, onClose }) {
       seen.add(key);
       return true;
     });
-    // For the filter tabs, use "Month Year" label when year differs from current
     return ['All', ...deduped.map(r => r.year === now.getFullYear() ? r.month : `${r.month} ${r.year}`)];
   }, [localSlots]);
 
@@ -78,13 +71,10 @@ export default function AdminPanel({ slots, onSlotsChange, onClose }) {
     const updated = await updateBookingStatus(id, status);
     setBookings(updated);
 
-    // When confirmed — auto-add as a booked slot so calendar updates immediately
     if (status === 'confirmed' && b) {
-      // Parse the date string back to day/month/year
-      // b.date is like "25 March 2026"
       const parts = b.date.split(' ');
       const day   = Number(parts[0]);
-      const monthName = parts[1];   // e.g. "March"
+      const monthName = parts[1];
       const year  = Number(parts[2]);
       const mNums = { January:'01',February:'02',March:'03',April:'04',May:'05',June:'06',
                       July:'07',August:'08',September:'09',October:'10',November:'11',December:'12' };
@@ -104,9 +94,8 @@ export default function AdminPanel({ slots, onSlotsChange, onClose }) {
 
       const updatedSlots = [...localSlots, newSlotEntry];
       setLocalSlots(updatedSlots);
-      onSlotsChange(updatedSlots); // saves to shared storage + updates parent
+      onSlotsChange(updatedSlots);
 
-      // WhatsApp confirmation to customer
       const msg = `*Alfa Catering BKD — Booking Confirmed* %0A%0ADear ${b.name},%0A%0AYour catering booking has been confirmed!%0ADate: *${b.date}*%0AShift: *${b.shiftLabel}*%0A${b.notes ? 'Notes: ' + b.notes + '%0A' : ''}%0AFor further details, our coordinator will contact you shortly.%0A%0A— Basheer Valiyandi%0A97455 75826`;
       window.open(`https://wa.me/${b.phone.replace(/\D/g,'')}?text=${msg}`, '_blank');
     }
@@ -129,7 +118,6 @@ export default function AdminPanel({ slots, onSlotsChange, onClose }) {
   const addSlot = () => {
     if (!newSlot.day || !newSlot.month) return;
     const id = Date.now();
-    // Parse "Month" or "Month YEAR" from newSlot.month
     const parts = newSlot.month.split(' ');
     const mName = parts[0];
     const slotYear = parts[1] ? Number(parts[1]) : new Date().getFullYear();
@@ -148,7 +136,6 @@ export default function AdminPanel({ slots, onSlotsChange, onClose }) {
 
   const displayed = useMemo(() => {
     if (filterMonth === 'All') return localSlots;
-    // filterMonth can be "March" or "March 2027"
     const parts = filterMonth.split(' ');
     const mName = parts[0];
     const mYear = parts[1] ? Number(parts[1]) : null;
@@ -177,7 +164,6 @@ export default function AdminPanel({ slots, onSlotsChange, onClose }) {
       <div className="admin-overlay" onClick={onClose} />
       <div className="admin-drawer">
 
-        {/* Header */}
         <div className="admin-header">
           <div>
             <h2 style={{ display:'flex', alignItems:'center', gap:'0.5rem' }}>
@@ -191,7 +177,6 @@ export default function AdminPanel({ slots, onSlotsChange, onClose }) {
           </button>
         </div>
 
-        {/* Tabs */}
         <div style={{ display:'flex', borderBottom:'2px solid var(--cream-dark)', flexShrink:0 }}>
           {tabs.map(({ key, Icon, label, badge }) => (
             <button key={key} onClick={() => setActiveTab(key)}
@@ -220,7 +205,6 @@ export default function AdminPanel({ slots, onSlotsChange, onClose }) {
 
         <div className="admin-body">
 
-          {/* ── BOOKINGS TAB ── */}
           {activeTab === 'bookings' && (
             <>
               <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'1rem' }}>
@@ -249,7 +233,6 @@ export default function AdminPanel({ slots, onSlotsChange, onClose }) {
                       padding:'1rem',
                       border:`1px solid ${statusColor[b.status] || 'var(--cream-dark)'}22`
                     }}>
-                      {/* Top row */}
                       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:'0.5rem' }}>
                         <div>
                           <div style={{ fontWeight:700, color:'var(--text-dark)', fontSize:'0.95rem' }}>{b.name}</div>
@@ -264,12 +247,10 @@ export default function AdminPanel({ slots, onSlotsChange, onClose }) {
                         }}>{b.status}</span>
                       </div>
 
-                      {/* Details */}
                       <div style={{ fontSize:'0.82rem', color:'var(--text-mid)', marginBottom:'0.6rem', display:'flex', flexDirection:'column', gap:3 }}>
                         {b.notes && <span><strong>Notes:</strong> {b.notes}</span>}
                       </div>
 
-                      {/* Actions */}
                       <div style={{ display:'flex', gap:'0.5rem', flexWrap:'wrap' }}>
                         <a href={`tel:${b.phone}`}
                           style={{
@@ -317,7 +298,6 @@ export default function AdminPanel({ slots, onSlotsChange, onClose }) {
             </>
           )}
 
-          {/* ── MANAGE SLOTS TAB ── */}
           {activeTab === 'manage' && (
             <>
               <div style={{ display:'flex', gap:'0.4rem', flexWrap:'wrap', marginBottom:'1rem' }}>
@@ -373,7 +353,6 @@ export default function AdminPanel({ slots, onSlotsChange, onClose }) {
             </>
           )}
 
-          {/* ── ADD SLOT TAB ── */}
           {activeTab === 'add' && (
             <div className="add-slot-form">
               <div className="admin-section-title">

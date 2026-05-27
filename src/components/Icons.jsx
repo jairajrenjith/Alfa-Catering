@@ -1,5 +1,3 @@
-// Centralized SVG icon library — consistent stroke style, no emojis
-
 export const PhoneIcon = ({ size = 18, color = 'currentColor' }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
     stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">

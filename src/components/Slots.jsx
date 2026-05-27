@@ -2,21 +2,17 @@ import { useState, useMemo } from 'react';
 import { PhoneIcon, ClockIcon, CalendarIcon } from './Icons';
 import BookingModal from './BookingModal';
 
-// ── Helpers ────────────────────────────────────────────────────────────────
 
 const MONTH_NAMES = ['January','February','March','April','May','June',
                      'July','August','September','October','November','December'];
 const MONTH_SHORT = ['Jan','Feb','Mar','Apr','May','Jun',
                      'Jul','Aug','Sep','Oct','Nov','Dec'];
 
-// Slot data uses month name strings — convert to {year, monthIdx}
 function slotMonthKey(slot) {
-  // slot.month is e.g. "March", slot.date is "2026-03-28"
   if (slot.date) {
     const [y, m] = slot.date.split('-');
-    return `${y}-${m}`;           // e.g. "2026-03"
+    return `${y}-${m}`;
   }
-  // fallback: assume 2026
   const idx = MONTH_NAMES.indexOf(slot.month);
   return `2026-${String(idx + 1).padStart(2,'0')}`;
 }
@@ -39,7 +35,6 @@ function monthKey(year, monthIdx) {
   return `${year}-${String(monthIdx + 1).padStart(2,'0')}`;
 }
 
-// Generate N months starting from today's month
 function generateMonths(count = 24) {
   const now = new Date();
   const result = [];
@@ -50,18 +45,15 @@ function generateMonths(count = 24) {
   return result;
 }
 
-// ── Component ───────────────────────────────────────────────────────────────
 
 export default function Slots({ slots }) {
   const today     = new Date();
   const todayKey  = monthKey(today.getFullYear(), today.getMonth());
 
-  // Build list of months: today + 23 future + any past months that have bookings
   const allMonths = useMemo(() => {
-    const future = generateMonths(24); // today → 24 months ahead
+    const future = generateMonths(24);
     const futureKeys = new Set(future.map(m => m.key));
 
-    // Collect any slot months that are before today and not already in future list
     const extraKeys = new Set();
     slots.forEach(s => {
       const k = slotMonthKey(s);
@@ -76,20 +68,17 @@ export default function Slots({ slots }) {
     return [...extras, ...future];
   }, [slots]);
 
-  // Which months have any slots (booked or added)
   const slotMonthKeys = useMemo(() => {
     const s = new Set();
     slots.forEach(sl => s.add(slotMonthKey(sl)));
     return s;
   }, [slots]);
 
-  // Default: today's month
   const [activeKey,   setActiveKey]   = useState(todayKey);
   const [activeShift, setActiveShift] = useState('all');
   const [viewMode,    setViewMode]    = useState('list');
   const [bookingInfo, setBookingInfo] = useState(null);
 
-  // Visible month window: show 6 months at a time, page through them
   const [windowStart, setWindowStart] = useState(0);
   const WINDOW = 6;
 
@@ -97,11 +86,9 @@ export default function Slots({ slots }) {
   const canPrev = windowStart > 0;
   const canNext = windowStart + WINDOW < allMonths.length;
 
-  // Active month meta
   const active = allMonths.find(m => m.key === activeKey) || allMonths[0];
   const { year: aYear, monthIdx: aMIdx } = active;
 
-  // Slots for active month
   const monthSlots = useMemo(() =>
     slots.filter(s => slotMonthKey(s) === activeKey),
   [slots, activeKey]);
@@ -110,7 +97,6 @@ export default function Slots({ slots }) {
     monthSlots.filter(s => activeShift === 'all' || s.shift === activeShift),
   [monthSlots, activeShift]);
 
-  // Booked days map for calendar
   const bookedDays = useMemo(() => {
     const map = {};
     monthSlots.forEach(s => {
@@ -130,13 +116,11 @@ export default function Slots({ slots }) {
 
   const selectMonth = (key) => {
     setActiveKey(key);
-    // If selected month not in current window, slide window
     const idx = allMonths.findIndex(m => m.key === key);
     if (idx < windowStart) setWindowStart(Math.max(0, idx));
     else if (idx >= windowStart + WINDOW) setWindowStart(Math.min(allMonths.length - WINDOW, idx - WINDOW + 1));
   };
 
-  // Group visible months by year for display
   const yearGroups = useMemo(() => {
     const groups = {};
     visibleMonths.forEach(m => {
@@ -156,7 +140,6 @@ export default function Slots({ slots }) {
         </p>
         <div className="divider" />
 
-        {/* Legend */}
         <div className="slots-legend">
           <div className="legend-dot"><span className="dot booked" />Booked</div>
           <div className="legend-dot"><span className="dot available" />Available</div>
@@ -172,7 +155,6 @@ export default function Slots({ slots }) {
           </div>
         </div>
 
-        {/* ── Month Navigator ── */}
         <div className="month-nav">
           <button
             className="month-nav-arrow"
@@ -223,7 +205,6 @@ export default function Slots({ slots }) {
           </button>
         </div>
 
-        {/* Active month heading */}
         <div style={{ marginBottom:'1rem', display:'flex', alignItems:'center', justifyContent:'space-between', flexWrap:'wrap', gap:'0.5rem' }}>
           <h3 style={{ fontFamily:'Playfair Display, serif', color:'var(--green)', fontSize:'1.3rem', fontWeight:600 }}>
             {MONTH_NAMES[aMIdx]} {aYear}
@@ -236,9 +217,7 @@ export default function Slots({ slots }) {
             )}
           </h3>
 
-          {/* Shift + View controls */}
           <div style={{ display:'flex', gap:'0.5rem', flexWrap:'wrap', alignItems:'center' }}>
-            {/* Shift filter */}
             {[['all','All'],['morning','AM'],['afternoon','PM']].map(([val, lbl]) => (
               <button key={val}
                 onClick={() => setActiveShift(val)}
@@ -260,7 +239,6 @@ export default function Slots({ slots }) {
 
             <div style={{ width:1, height:22, background:'var(--cream-dark)', margin:'0 0.2rem' }} />
 
-            {/* View toggle */}
             {[['list','List'],['calendar','Cal']].map(([v,l]) => (
               <button key={v} onClick={() => setViewMode(v)}
                 style={{
@@ -274,7 +252,6 @@ export default function Slots({ slots }) {
           </div>
         </div>
 
-        {/* ── CALENDAR VIEW ── */}
         {viewMode === 'calendar' && (
           <div className="cal-wrap">
             <div className="cal-header">
@@ -291,7 +268,6 @@ export default function Slots({ slots }) {
                 const fullyBooked  = hasMorning && hasAfternoon;
                 const free         = shifts.length === 0;
 
-                // Dim past days
                 const cellDate = new Date(aYear, aMIdx, day);
                 const isPast   = cellDate < new Date(today.getFullYear(), today.getMonth(), today.getDate());
 
@@ -320,11 +296,9 @@ export default function Slots({ slots }) {
           </div>
         )}
 
-        {/* ── LIST VIEW ── */}
         {viewMode === 'list' && (() => {
           const today0 = new Date(today.getFullYear(), today.getMonth(), today.getDate());
 
-          // Days in this month that have at least one free shift
           const daysInMonth = new Date(aYear, aMIdx + 1, 0).getDate();
           const freeSlotsRows = [];
           for (let d = 1; d <= daysInMonth; d++) {
@@ -340,7 +314,6 @@ export default function Slots({ slots }) {
 
           return (
             <>
-              {/* Booked slots */}
               {filtered.length === 0 ? (
                 <div style={{ textAlign:'center', padding:'2rem', background:'var(--white)',
                   borderRadius:'var(--radius)', color:'var(--text-light)', marginBottom:'1rem' }}>
@@ -355,7 +328,6 @@ export default function Slots({ slots }) {
                   {filtered.map(slot => {
                     const slotDate = new Date(aYear, aMIdx, slot.day);
                     const isPast   = slotDate < today0;
-                    // Which opposite shift is free on this same day?
                     const shiftsOnDay = bookedDays[slot.day] || [];
                     const oppFree = !isPast && (
                       slot.shift === 'morning'   ? !shiftsOnDay.includes('afternoon') :
@@ -382,7 +354,6 @@ export default function Slots({ slots }) {
                               {slot.time ? ` · ${slot.time}` : ''}
                             </span>
                           </div>
-                          {/* Book opposite shift if free */}
                           {oppFree && (
                             <button
                               onClick={() => openBooking(slot.day, oppShift)}
@@ -414,7 +385,6 @@ export default function Slots({ slots }) {
                 </div>
               )}
 
-              {/* Available dates to book */}
               {freeSlotsRows.length > 0 && (
                 <div style={{ background:'var(--available-light)', borderRadius:'var(--radius)',
                   padding:'1rem 1.25rem', border:'1px solid rgba(39,174,96,0.2)',
@@ -457,7 +427,6 @@ export default function Slots({ slots }) {
           );
         })()}
 
-        {/* Bottom CTA */}
         <div style={{ marginTop:'2rem', background:'var(--white)', borderRadius:'var(--radius)',
           padding:'1.5rem 2rem', border:'1px solid var(--cream-dark)',
           display:'flex', alignItems:'center', gap:'1rem', flexWrap:'wrap' }}>

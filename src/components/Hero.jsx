@@ -25,7 +25,6 @@ export default function Hero() {
           മണിയൂർ · മന്തരത്തൂർ · കേരള
         </p>
 
-        {/* Malayalam Caption — verbatim */}
         <div className="hero-caption malayalam">
           <span className="caption-text">
             ആഘോഷങ്ങൾ എന്തുമാവട്ടെ സ്വാദുള്ള ഭക്ഷണം വിളമ്പണം, വയറു പോലെ മനസ്സും നിറയണം,

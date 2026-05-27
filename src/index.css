@@ -48,7 +48,6 @@ body {
   color: var(--text-dark);
   line-height: 1.6;
   overflow-x: hidden;
-  /* Do NOT use overflow-x: clip — it clips position:fixed children on mobile WebKit */
 }
 
 h1, h2, h3, h4 { font-family: 'Playfair Display', serif; }
